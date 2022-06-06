@@ -1,6 +1,8 @@
 package org.poznansky.crypto.cw
 
 import java.math.BigInteger
+import java.nio.file.Files
+import java.nio.file.Path
 
 
 val SBOX1ARR = arrayOf(
@@ -33,7 +35,7 @@ val C4 = BigInteger("54FF53A5F1D36F1C", 16)
 val C5 = BigInteger("10E527FADE682D1D", 16)
 val C6 = BigInteger("B05688C2B3E6C1FD", 16)
 
-fun encryptCamellia(key: BigInteger, value: BigInteger): BigInteger {
+fun encryptCamellia(key: BigInteger, input: Path, output: Path) {
     val KL = key
     val KR = BigInteger.ZERO
     val (KA, KB) = getKAKB(KL, KR)
@@ -65,46 +67,62 @@ fun encryptCamellia(key: BigInteger, value: BigInteger): BigInteger {
     val kw3 = KA.cycleShiftLeft128(111) shr 64
     val kw4 = KA.cycleShiftLeft128(111) and MASK64
 
+    fun ecryptBlock128(M: BigInteger): BigInteger {
+        var D1 = M shr 64 // Шифруемое сообщение делится на две 64-битные части
+        var D2 = M and MASK64
+        D1 = D1 xor kw1 // Предварительное забеливание
+        D2 = D2 xor kw2
+        D2 = D2 xor F(D1, k1)
+        D1 = D1 xor F(D2, k2)
+        D2 = D2 xor F(D1, k3)
+        D1 = D1 xor F(D2, k4)
+        D2 = D2 xor F(D1, k5)
+        D1 = D1 xor F(D2, k6)
+        D1 = FL(D1, ke1) // FL
 
-    var D1 = value shr 64 // Шифруемое сообщение делится на две 64-битные части
-    var D2 = value and MASK64
-    D1 = D1 xor kw1 // Предварительное забеливание
-    D2 = D2 xor kw2
-    D2 = D2 xor F(D1, k1)
-    D1 = D1 xor F(D2, k2)
-    D2 = D2 xor F(D1, k3)
-    D1 = D1 xor F(D2, k4)
-    D2 = D2 xor F(D1, k5)
-    D1 = D1 xor F(D2, k6)
-    D1 = FL(D1, ke1) // FL
+        D2 = FLINV(D2, ke2) // FLINV
 
-    D2 = FLINV(D2, ke2) // FLINV
+        D2 = D2 xor F(D1, k7)
+        D1 = D1 xor F(D2, k8)
+        D2 = D2 xor F(D1, k9)
+        D1 = D1 xor F(D2, k10)
+        D2 = D2 xor F(D1, k11)
+        D1 = D1 xor F(D2, k12)
+        D1 = FL(D1, ke3) // FL
 
-    D2 = D2 xor F(D1, k7)
-    D1 = D1 xor F(D2, k8)
-    D2 = D2 xor F(D1, k9)
-    D1 = D1 xor F(D2, k10)
-    D2 = D2 xor F(D1, k11)
-    D1 = D1 xor F(D2, k12)
-    D1 = FL(D1, ke3) // FL
+        D2 = FLINV(D2, ke4) // FLINV
 
-    D2 = FLINV(D2, ke4) // FLINV
+        D2 = D2 xor F(D1, k13)
+        D1 = D1 xor F(D2, k14)
+        D2 = D2 xor F(D1, k15)
+        D1 = D1 xor F(D2, k16)
+        D2 = D2 xor F(D1, k17)
+        D1 = D1 xor F(D2, k18)
+        D2 = D2 xor kw3 // Финальное забеливание
 
-    D2 = D2 xor F(D1, k13)
-    D1 = D1 xor F(D2, k14)
-    D2 = D2 xor F(D1, k15)
-    D1 = D1 xor F(D2, k16)
-    D2 = D2 xor F(D1, k17)
-    D1 = D1 xor F(D2, k18)
-    D2 = D2 xor kw3 // Финальное забеливание
+        D1 = D1 xor kw4
+        val C = (D2 shl 64) or D1
 
-    D1 = D1 xor kw4
-    val C = (D2 shl 64) or D1
+        return C
+    }
 
-    return C
+    val bytes: ByteArray = Files.readAllBytes(input)
+
+    val encrypted: ByteArray =
+        bytes.asSequence().chunked(16)
+            .map { chunk -> BigInteger( chunk.toByteArray()) }
+            .onEach { check(it.toByteArray().size <= 16) }
+            .map { ecryptBlock128(it) }
+            .map { it.toByteArray() }
+            .map { it.dropWhile { b -> b.toInt() == 0 }.toByteArray() }
+            .onEach { check(it.size <= 16) }
+            .map { ByteArray(16 - it.size) { 0 } + it }
+            .reduce(ByteArray::plus)
+
+    Files.write(output, encrypted)
 }
 
-fun decryptCamellia(key: BigInteger, value: BigInteger): BigInteger {
+fun decryptCamellia(key: BigInteger, input: Path, output: Path) {
     val KL = key
     val KR = BigInteger.ZERO
     val (KA, KB) = getKAKB(KL, KR)
@@ -136,43 +154,57 @@ fun decryptCamellia(key: BigInteger, value: BigInteger): BigInteger {
     val kw1 = KA.cycleShiftLeft128(111) shr 64
     val kw2 = KA.cycleShiftLeft128(111) and MASK64
 
+    fun decryptBlock128(M: BigInteger): BigInteger {
+        var D1 = M shr 64 // Шифруемое сообщение делится на две 64-битные части
+        var D2 = M and MASK64
+        D1 = D1 xor kw1 // Предварительное забеливание
+        D2 = D2 xor kw2
+        D2 = D2 xor F(D1, k1)
+        D1 = D1 xor F(D2, k2)
+        D2 = D2 xor F(D1, k3)
+        D1 = D1 xor F(D2, k4)
+        D2 = D2 xor F(D1, k5)
+        D1 = D1 xor F(D2, k6)
+        D1 = FL(D1, ke1) // FL
 
-    var D1 = value shr 64 // Шифруемое сообщение делится на две 64-битные части
-    var D2 = value and MASK64
-    D1 = D1 xor kw1 // Предварительное забеливание
-    D2 = D2 xor kw2
-    D2 = D2 xor F(D1, k1)
-    D1 = D1 xor F(D2, k2)
-    D2 = D2 xor F(D1, k3)
-    D1 = D1 xor F(D2, k4)
-    D2 = D2 xor F(D1, k5)
-    D1 = D1 xor F(D2, k6)
-    D1 = FL(D1, ke1) // FL
+        D2 = FLINV(D2, ke2) // FLINV
 
-    D2 = FLINV(D2, ke2) // FLINV
+        D2 = D2 xor F(D1, k7)
+        D1 = D1 xor F(D2, k8)
+        D2 = D2 xor F(D1, k9)
+        D1 = D1 xor F(D2, k10)
+        D2 = D2 xor F(D1, k11)
+        D1 = D1 xor F(D2, k12)
+        D1 = FL(D1, ke3) // FL
 
-    D2 = D2 xor F(D1, k7)
-    D1 = D1 xor F(D2, k8)
-    D2 = D2 xor F(D1, k9)
-    D1 = D1 xor F(D2, k10)
-    D2 = D2 xor F(D1, k11)
-    D1 = D1 xor F(D2, k12)
-    D1 = FL(D1, ke3) // FL
+        D2 = FLINV(D2, ke4) // FLINV
 
-    D2 = FLINV(D2, ke4) // FLINV
+        D2 = D2 xor F(D1, k13)
+        D1 = D1 xor F(D2, k14)
+        D2 = D2 xor F(D1, k15)
+        D1 = D1 xor F(D2, k16)
+        D2 = D2 xor F(D1, k17)
+        D1 = D1 xor F(D2, k18)
+        D2 = D2 xor kw3 // Финальное забеливание
 
-    D2 = D2 xor F(D1, k13)
-    D1 = D1 xor F(D2, k14)
-    D2 = D2 xor F(D1, k15)
-    D1 = D1 xor F(D2, k16)
-    D2 = D2 xor F(D1, k17)
-    D1 = D1 xor F(D2, k18)
-    D2 = D2 xor kw3 // Финальное забеливание
+        D1 = D1 xor kw4
+        val C = (D2 shl 64) or D1
 
-    D1 = D1 xor kw4
-    val C = (D2 shl 64) or D1
+        return C
+    }
 
-    return C
+    val bytes: ByteArray = Files.readAllBytes(input)
+
+    val decrypted = bytes.asSequence().chunked(16)
+        .map { chunk -> BigInteger(ByteArray(1) { 0 } + chunk.toByteArray()) }
+        .onEach { check(it >= BigInteger.ZERO) }
+        .map { decryptBlock128(it) }
+        .map { it.toByteArray() }
+        .onEach { check(it.size <= 16) }
+        .map { ByteArray(16 - it.size) { 0 } + it }
+        .reduce(ByteArray::plus)
+
+    Files.write(output, decrypted)
 }
 
 fun getKAKB(KL: BigInteger, KR: BigInteger): Pair<BigInteger, BigInteger> {
@@ -268,3 +300,151 @@ fun BigInteger.cycleShiftLeft8(count: Int) = this.shiftLeft(count).or(this.shift
 fun BigInteger.cycleShiftLeft32(count: Int) = this.shiftLeft(count).or(this.shiftRight(32 - count)).and(MASK32)
 
 fun BigInteger.cycleShiftLeft128(count: Int) = this.shiftLeft(count).or(this.shiftRight(128 - count)).and(MASK128)
+
+fun encryptCamelliaBLOCK(key: BigInteger, value: BigInteger):BigInteger {
+    val KL = key
+    val KR = BigInteger.ZERO
+    val (KA, KB) = getKAKB(KL, KR)
+
+    val kw1 = KL.cycleShiftLeft128(0) shr 64
+    val kw2 = KL.cycleShiftLeft128(0) and MASK64
+    val k1 = KA.cycleShiftLeft128(0) shr 64
+    val k2 = KA.cycleShiftLeft128(0) and MASK64
+    val k3 = KL.cycleShiftLeft128(15) shr 64
+    val k4 = KL.cycleShiftLeft128(15) and MASK64
+    val k5 = KA.cycleShiftLeft128(15) shr 64
+    val k6 = KA.cycleShiftLeft128(15) and MASK64
+    val ke1 = KA.cycleShiftLeft128(30) shr 64
+    val ke2 = KA.cycleShiftLeft128(30) and MASK64
+    val k7 = KL.cycleShiftLeft128(45) shr 64
+    val k8 = KL.cycleShiftLeft128(45) and MASK64
+    val k9 = KA.cycleShiftLeft128(45) shr 64
+    val k10 = KL.cycleShiftLeft128(60) and MASK64
+    val k11 = KA.cycleShiftLeft128(60) shr 64
+    val k12 = KA.cycleShiftLeft128(60) and MASK64
+    val ke3 = KL.cycleShiftLeft128(77) shr 64
+    val ke4 = KL.cycleShiftLeft128(77) and MASK64
+    val k13 = KL.cycleShiftLeft128(94) shr 64
+    val k14 = KL.cycleShiftLeft128(94) and MASK64
+    val k15 = KA.cycleShiftLeft128(94) shr 64
+    val k16 = KA.cycleShiftLeft128(94) and MASK64
+    val k17 = KL.cycleShiftLeft128(111) shr 64
+    val k18 = KL.cycleShiftLeft128(111) and MASK64
+    val kw3 = KA.cycleShiftLeft128(111) shr 64
+    val kw4 = KA.cycleShiftLeft128(111) and MASK64
+
+    fun ecryptBlock128(M: BigInteger): BigInteger {
+        var D1 = M shr 64 // Шифруемое сообщение делится на две 64-битные части
+        var D2 = M and MASK64
+        D1 = D1 xor kw1 // Предварительное забеливание
+        D2 = D2 xor kw2
+        D2 = D2 xor F(D1, k1)
+        D1 = D1 xor F(D2, k2)
+        D2 = D2 xor F(D1, k3)
+        D1 = D1 xor F(D2, k4)
+        D2 = D2 xor F(D1, k5)
+        D1 = D1 xor F(D2, k6)
+        D1 = FL(D1, ke1) // FL
+
+        D2 = FLINV(D2, ke2) // FLINV
+
+        D2 = D2 xor F(D1, k7)
+        D1 = D1 xor F(D2, k8)
+        D2 = D2 xor F(D1, k9)
+        D1 = D1 xor F(D2, k10)
+        D2 = D2 xor F(D1, k11)
+        D1 = D1 xor F(D2, k12)
+        D1 = FL(D1, ke3) // FL
+
+        D2 = FLINV(D2, ke4) // FLINV
+
+        D2 = D2 xor F(D1, k13)
+        D1 = D1 xor F(D2, k14)
+        D2 = D2 xor F(D1, k15)
+        D1 = D1 xor F(D2, k16)
+        D2 = D2 xor F(D1, k17)
+        D1 = D1 xor F(D2, k18)
+        D2 = D2 xor kw3 // Финальное забеливание
+
+        D1 = D1 xor kw4
+        val C = (D2 shl 64) or D1
+
+        return C
+    }
+
+    return ecryptBlock128(value)
+}
+
+fun decryptCamelliaBLOCK(key: BigInteger, value: BigInteger):BigInteger {
+    val KL = key
+    val KR = BigInteger.ZERO
+    val (KA, KB) = getKAKB(KL, KR)
+
+    val kw3 = KL.cycleShiftLeft128(0) shr 64
+    val kw4 = KL.cycleShiftLeft128(0) and MASK64
+    val k18 = KA.cycleShiftLeft128(0) shr 64
+    val k17 = KA.cycleShiftLeft128(0) and MASK64
+    val k16 = KL.cycleShiftLeft128(15) shr 64
+    val k15 = KL.cycleShiftLeft128(15) and MASK64
+    val k14 = KA.cycleShiftLeft128(15) shr 64
+    val k13 = KA.cycleShiftLeft128(15) and MASK64
+    val ke4 = KA.cycleShiftLeft128(30) shr 64
+    val ke3 = KA.cycleShiftLeft128(30) and MASK64
+    val k12 = KL.cycleShiftLeft128(45) shr 64
+    val k11 = KL.cycleShiftLeft128(45) and MASK64
+    val k10 = KA.cycleShiftLeft128(45) shr 64
+    val k9 = KL.cycleShiftLeft128(60) and MASK64
+    val k8 = KA.cycleShiftLeft128(60) shr 64
+    val k7 = KA.cycleShiftLeft128(60) and MASK64
+    val ke2 = KL.cycleShiftLeft128(77) shr 64
+    val ke1 = KL.cycleShiftLeft128(77) and MASK64
+    val k6 = KL.cycleShiftLeft128(94) shr 64
+    val k5 = KL.cycleShiftLeft128(94) and MASK64
+    val k4 = KA.cycleShiftLeft128(94) shr 64
+    val k3 = KA.cycleShiftLeft128(94) and MASK64
+    val k2 = KL.cycleShiftLeft128(111) shr 64
+    val k1 = KL.cycleShiftLeft128(111) and MASK64
+    val kw1 = KA.cycleShiftLeft128(111) shr 64
+    val kw2 = KA.cycleShiftLeft128(111) and MASK64
+
+    fun decryptBlock128(M: BigInteger): BigInteger {
+        var D1 = M shr 64 // Шифруемое сообщение делится на две 64-битные части
+        var D2 = M and MASK64
+        D1 = D1 xor kw1 // Предварительное забеливание
+        D2 = D2 xor kw2
+        D2 = D2 xor F(D1, k1)
+        D1 = D1 xor F(D2, k2)
+        D2 = D2 xor F(D1, k3)
+        D1 = D1 xor F(D2, k4)
+        D2 = D2 xor F(D1, k5)
+        D1 = D1 xor F(D2, k6)
+        D1 = FL(D1, ke1) // FL
+
+        D2 = FLINV(D2, ke2) // FLINV
+
+        D2 = D2 xor F(D1, k7)
+        D1 = D1 xor F(D2, k8)
+        D2 = D2 xor F(D1, k9)
+        D1 = D1 xor F(D2, k10)
+        D2 = D2 xor F(D1, k11)
+        D1 = D1 xor F(D2, k12)
+        D1 = FL(D1, ke3) // FL
+
+        D2 = FLINV(D2, ke4) // FLINV
+
+        D2 = D2 xor F(D1, k13)
+        D1 = D1 xor F(D2, k14)
+        D2 = D2 xor F(D1, k15)
+        D1 = D1 xor F(D2, k16)
+        D2 = D2 xor F(D1, k17)
+        D1 = D1 xor F(D2, k18)
+        D2 = D2 xor kw3 // Финальное забеливание
+
+        D1 = D1 xor kw4
+        val C = (D2 shl 64) or D1
+
+        return C
+    }
+
+    return decryptBlock128(value)
+}
