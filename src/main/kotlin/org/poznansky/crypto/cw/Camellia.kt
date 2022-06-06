@@ -106,12 +106,19 @@ fun encryptCamellia(key: BigInteger, input: Path, output: Path) {
         return C
     }
 
-    val bytes: ByteArray = Files.readAllBytes(input)
+    var bytes: ByteArray = Files.readAllBytes(input)
+
+    val padding = 16 - bytes.size % 16
+    bytes += if (padding == 0) {
+        ByteArray(16) { 16 }
+    } else {
+        ByteArray(padding) { padding.toByte() }
+    }
 
     val encrypted: ByteArray =
         bytes.asSequence().chunked(16)
-            .map { chunk -> BigInteger( chunk.toByteArray()) }
-            .onEach { check(it.toByteArray().size <= 16) }
+            .map { chunk -> BigInteger(ByteArray(1) { 0 } + chunk.toByteArray()) }
+            .onEach { check(it.toByteArray().size <= 17) }
             .map { ecryptBlock128(it) }
             .map { it.toByteArray() }
             .map { it.dropWhile { b -> b.toInt() == 0 }.toByteArray() }
@@ -195,14 +202,18 @@ fun decryptCamellia(key: BigInteger, input: Path, output: Path) {
 
     val bytes: ByteArray = Files.readAllBytes(input)
 
-    val decrypted = bytes.asSequence().chunked(16)
+    var decrypted = bytes.asSequence().chunked(16)
         .map { chunk -> BigInteger(ByteArray(1) { 0 } + chunk.toByteArray()) }
         .onEach { check(it >= BigInteger.ZERO) }
         .map { decryptBlock128(it) }
         .map { it.toByteArray() }
+        .map { it.dropWhile { b -> b.toInt() == 0 }.toByteArray() }
         .onEach { check(it.size <= 16) }
         .map { ByteArray(16 - it.size) { 0 } + it }
         .reduce(ByteArray::plus)
+
+    val padding = decrypted.last()
+    decrypted = decrypted.dropLast(padding.toInt()).toByteArray()
 
     Files.write(output, decrypted)
 }
@@ -301,7 +312,7 @@ fun BigInteger.cycleShiftLeft32(count: Int) = this.shiftLeft(count).or(this.shif
 
 fun BigInteger.cycleShiftLeft128(count: Int) = this.shiftLeft(count).or(this.shiftRight(128 - count)).and(MASK128)
 
-fun encryptCamelliaBLOCK(key: BigInteger, value: BigInteger):BigInteger {
+fun encryptCamelliaBLOCK(key: BigInteger, value: BigInteger): BigInteger {
     val KL = key
     val KR = BigInteger.ZERO
     val (KA, KB) = getKAKB(KL, KR)
@@ -375,7 +386,7 @@ fun encryptCamelliaBLOCK(key: BigInteger, value: BigInteger):BigInteger {
     return ecryptBlock128(value)
 }
 
-fun decryptCamelliaBLOCK(key: BigInteger, value: BigInteger):BigInteger {
+fun decryptCamelliaBLOCK(key: BigInteger, value: BigInteger): BigInteger {
     val KL = key
     val KR = BigInteger.ZERO
     val (KA, KB) = getKAKB(KL, KR)

@@ -64,11 +64,11 @@ fun main(args: Array<String>) {
 
 
 
-    Files.write(Path.of(TEXT_FILE), "555555555555555555555555555555550123456789abcdeffedcba987654321055555555555555555555555555555555".decodeHex())
+    //Files.write(Path.of(TEXT_FILE), "555555555555555555555555555555550123456789abcdeffedcba987654321055555555555555555555555555555555".decodeHex())
     val key = BigInteger("0123456789abcdeffedcba9876543210", 16)
-    encryptCamellia(key, Path.of(TEXT_FILE), Path.of(MIDDLE_FILE))
-    decryptCamellia(key, Path.of(MIDDLE_FILE), Path.of(TEXT_OUT))
-    if(isEqual(Path.of(TEXT_FILE), Path.of(TEXT_OUT))){
+    encryptCamellia(key, Path.of(CAT_FILE), Path.of(MIDDLE_FILE))
+    decryptCamellia(key, Path.of(MIDDLE_FILE), Path.of(OUT_CAT))
+    if(isEqual(Path.of(CAT_FILE), Path.of(OUT_CAT))){
         println("OK")
     }
 
