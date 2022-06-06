@@ -14,14 +14,26 @@ data class PublicKey(
     val y: BigInteger,
     val r: BigInteger,
     val n: BigInteger,
-)
+) {
+    override fun toString(): String {
+        return "PublicKey(y=$y, r=$r, n=$n)"
+    }
+}
 
 data class PrivateKey(
     val p: BigInteger,
     val q: BigInteger,
-)
+) {
+    override fun toString(): String {
+        return "PrivateKey(p=$p, q=$q)"
+    }
+}
 
-data class Keys(val pub: PublicKey, val priv: PrivateKey)
+data class Keys(val pub: PublicKey, val priv: PrivateKey) {
+    override fun toString(): String {
+        return "Keys(pub=$pub, priv=$priv)"
+    }
+}
 
 
 fun generateBenaloh(): Keys {
