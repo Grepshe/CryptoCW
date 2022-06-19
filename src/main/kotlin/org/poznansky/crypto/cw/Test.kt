@@ -45,7 +45,7 @@ fun main(args: Array<String>) {
 //    else
 //        println("Govno")
 
-    val key1 = BigInteger("0123456789abcdeffedcba9876543210", 16)
+    /*val key1 = BigInteger("0123456789abcdeffedcba9876543210", 16)
     val rawData = BigInteger("0123456789abcdeffedcba9876543210", 16)
     val encryptedData = encryptCamelliaBLOCK(key1, rawData)
     val decryptedData = decryptCamelliaBLOCK(key1, encryptedData)
@@ -73,5 +73,15 @@ fun main(args: Array<String>) {
     }
 
 
-    println("Finish")
+    println("Finish")*/
+        val cipherText = "CipherText"
+        val key = "10102312"
+    val CTbyte = cipherText.toByteArray()
+    val Keybyte = key.toByteArray()
+    val enc = MARS.encrypt(CTbyte, Keybyte)
+
+    val dec = MARS.decrypt(enc, Keybyte);
+
+    println("OK")
+
 }

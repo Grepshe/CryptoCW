@@ -10,6 +10,7 @@ import javafx.scene.layout.Pane
 import javafx.stage.FileChooser
 import java.math.BigInteger
 import java.net.URL
+import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
 
@@ -95,8 +96,13 @@ class Controller : Initializable {
                     }
                     "Camellia" -> {
                         val key = BigInteger(InpPaKey.text, 10)
-                        encryptCamellia(key, infile, outfile)
+                        val keybytes = key.toByteArray()
+                        val bytes: ByteArray = Files.readAllBytes(infile)
+                        val encrypted = MARS.encrypt(bytes, keybytes)
+                        Files.write(outfile, encrypted)
+                        //encryptCamellia(key, infile, outfile)
                     }
+                    else -> throw AssertionError()
                 }
             }
         }
@@ -122,8 +128,14 @@ class Controller : Initializable {
                     }
                     "Camellia" -> {
                         val key = BigInteger(InpPaKey.text, 10)
-                        decryptCamellia(key, infile, outfile)
+                        val keybytes = key.toByteArray()
+                        val bytes: ByteArray = Files.readAllBytes(infile)
+                        val decrypted = MARS.decrypt(bytes, keybytes)
+                        Files.write(outfile, decrypted)
+                        //val key = BigInteger(InpPaKey.text, 10)
+                        //decryptCamellia(key, infile, outfile)
                     }
+                    else -> throw AssertionError()
                 }
             }
         }
