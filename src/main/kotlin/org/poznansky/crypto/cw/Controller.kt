@@ -45,7 +45,7 @@ class Controller : Initializable {
     var outputFile: Path? = null
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
-        choiceBoxMeth.items.addAll("Benaloh", "Camellia")
+        choiceBoxMeth.items.addAll("Benaloh", "MARS")
         choiceBoxMeth.value = "Benaloh"
     }
 
@@ -74,7 +74,7 @@ class Controller : Initializable {
                 inpPaP.text = keys.priv.p.toString()
                 inpPaQ.text = keys.priv.q.toString()
             }
-            "Camellia" -> {
+            "MARS" -> {
                 val key = BigInteger(128, Random())
                 InpPaKey.text = key.toString(10)
             }
@@ -94,13 +94,12 @@ class Controller : Initializable {
                         )
                         encryptBenaloh(pubk, infile, outfile)
                     }
-                    "Camellia" -> {
+                    "MARS" -> {
                         val key = BigInteger(InpPaKey.text, 10)
                         val keybytes = key.toByteArray()
                         val bytes: ByteArray = Files.readAllBytes(infile)
                         val encrypted = MARS.encrypt(bytes, keybytes)
                         Files.write(outfile, encrypted)
-                        //encryptCamellia(key, infile, outfile)
                     }
                     else -> throw AssertionError()
                 }
@@ -126,14 +125,12 @@ class Controller : Initializable {
                         val keys = Keys(pubk, privk)
                         decryptBenaloh(keys, infile, outfile)
                     }
-                    "Camellia" -> {
+                    "MARS" -> {
                         val key = BigInteger(InpPaKey.text, 10)
                         val keybytes = key.toByteArray()
                         val bytes: ByteArray = Files.readAllBytes(infile)
                         val decrypted = MARS.decrypt(bytes, keybytes)
                         Files.write(outfile, decrypted)
-                        //val key = BigInteger(InpPaKey.text, 10)
-                        //decryptCamellia(key, infile, outfile)
                     }
                     else -> throw AssertionError()
                 }

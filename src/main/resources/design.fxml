@@ -24,7 +24,7 @@
       <TextField fx:id="inpPaP" layoutX="221.0" layoutY="131.0" prefHeight="25.0" prefWidth="159.0" />
       <TextField fx:id="inpPaQ" layoutX="221.0" layoutY="170.0" prefHeight="25.0" prefWidth="159.0" />
       <TextField fx:id="InpPaKey" layoutX="226.0" layoutY="256.0" prefHeight="25.0" prefWidth="159.0" />
-      <Label layoutX="112.0" layoutY="260.0" text="Key(128)(Camellia )" />
+      <Label layoutX="112.0" layoutY="260.0" text="Key(128)(MARS)" />
       <Button fx:id="buttonKeygen" layoutX="520.0" layoutY="51.0" mnemonicParsing="false" onAction="#onKeygen" prefHeight="25.0" prefWidth="66.0" text="Keygen" />
    </children>
 </Pane>
