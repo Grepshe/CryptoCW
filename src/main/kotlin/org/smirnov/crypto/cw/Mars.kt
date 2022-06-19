@@ -703,7 +703,6 @@ object MARS {
         return `val` ushr pas or (`val` shl 32 - pas)
     }
 
-    //E Function
     private fun expandKey(key: ByteArray): IntArray {
         val n = key.size / 4
         val tmp = IntArray(40)
@@ -758,7 +757,6 @@ object MARS {
         return m and -0x4
     }
 
-    //Encrypt Data Block Function
     fun encryptBloc(`in`: ByteArray): ByteArray {
         val tmp = ByteArray(`in`.size)
         var aux: Int
@@ -780,7 +778,6 @@ object MARS {
         C = C + K[2]
         D = D + K[3]
 
-        //Phase 1: Forward Mixing
         for (i in 0..7) {
             B = B xor s_box[A and 0xff]
             B = B + s_box[(rotateRight(A, 8) and 0xff) + 256]
@@ -800,7 +797,6 @@ object MARS {
         var M: Int
         var eout: IntArray
 
-        //Main Cryptographic Core
         for (i in 0..15) {
             eout = E_func(A, K[2 * i + 4], K[2 * i + 5])
             A = rotateLeft(A, 13)
@@ -818,7 +814,6 @@ object MARS {
             C = D
             D = aux
         }
-        //Phase 3: Backwards Mixing
         for (i in 0..7) {
             if (i == 3 || i == 7) A = A - B
             if (i == 2 || i == 6) A = A - D
@@ -847,7 +842,6 @@ object MARS {
         return tmp
     }
 
-    //E-Function
     private fun E_func(`in`: Int, k1: Int, k2: Int): IntArray {
         val tmp = IntArray(3)
         var M: Int
@@ -868,7 +862,6 @@ object MARS {
         return tmp
     }
 
-    //Decrypt Data Block Function
     fun decryptBloc(`in`: ByteArray): ByteArray {
         val tmp = ByteArray(`in`.size)
         var aux: Int
@@ -890,7 +883,6 @@ object MARS {
         C = C + K[38]
         D = D + K[39]
 
-        //Phase 1 Forward Mixing
         for (i in 7 downTo 0) {
             aux = D
             D = C
@@ -906,7 +898,6 @@ object MARS {
             if (i == 3 || i == 7) A = A + B
         }
         var eout: IntArray
-        // Cryptographic Core
         for (i in 15 downTo 0) {
             aux = D
             D = C
@@ -924,7 +915,6 @@ object MARS {
                 B = B xor eout[2]
             }
         }
-        //Phase 3 Backwards Mixing
         for (i in 7 downTo 0) {
             aux = D
             D = C
@@ -953,7 +943,6 @@ object MARS {
         return tmp
     }
 
-    //Main Encryption Function
     fun encrypt(`in`: ByteArray, key: ByteArray): ByteArray {
         K = expandKey(key)
         var lenght = 0
@@ -969,7 +958,6 @@ object MARS {
         val tmp = ByteArray(`in`.size + lenght)
         var bloc = ByteArray(16)
         var count = 0
-        //16 Rounds of Mayn Keyed Transformation
         i = 0
         while (i < `in`.size + lenght) {
             if (i > 0 && i % 16 == 0) {
@@ -989,13 +977,11 @@ object MARS {
         return tmp
     }
 
-    //Main Decryption Function
     fun decrypt(`in`: ByteArray, key: ByteArray): ByteArray {
         var tmp = ByteArray(`in`.size)
         var bloc = ByteArray(16)
         K = expandKey(key)
         var i: Int
-        //16 Rounds of Main Keyed Transformation
         i = 0
         while (i < `in`.size) {
             if (i > 0 && i % 16 == 0) {
