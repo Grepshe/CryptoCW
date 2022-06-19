@@ -4,27 +4,34 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.Pane?>
 
-<Pane fx:id="paneMain" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.poznansky.crypto.cw.Controller">
+<Pane fx:id="paneMain" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: gray;" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.poznansky.crypto.cw.Controller">
    <children>
-      <Button fx:id="buttonOpenFile" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#onOpenFile" text="Open File" />
-      <Button fx:id="buttonSaveFile" layoutX="14.0" layoutY="51.0" mnemonicParsing="false" onAction="#onSaveFile" prefHeight="25.0" prefWidth="66.0" text="Save File" />
-      <Button fx:id="buttonEncrypt" layoutX="520.0" layoutY="98.0" mnemonicParsing="false" onAction="#onEncrypt" prefHeight="25.0" prefWidth="66.0" text="Encrypt" />
-      <Button fx:id="buttonDecrypt" layoutX="520.0" layoutY="131.0" mnemonicParsing="false" onAction="#onDecrypt" prefHeight="25.0" prefWidth="66.0" text="Decrypt" />
-      <TextField fx:id="inpPaY" layoutX="221.0" layoutY="14.0" prefHeight="25.0" prefWidth="159.0" />
-      <ChoiceBox fx:id="choiceBoxMeth" layoutX="14.0" layoutY="89.0" prefHeight="25.0" prefWidth="66.0" />
-      <Label layoutX="113.0" layoutY="18.0" text="y(Benaloh)" />
-      <Label layoutX="114.0" layoutY="55.0" text="r(Benaloh)" />
-      <Label layoutX="113.0" layoutY="93.0" text="n(Benaloh)" />
-      <Label layoutX="112.0" layoutY="135.0" text="p(Benaloh)" />
-      <Label layoutX="112.0" layoutY="174.0" text="q(Benaloh)" />
-      <TextField fx:id="inpPaR" layoutX="221.0" layoutY="51.0" prefHeight="25.0" prefWidth="159.0" />
-      <TextField fx:id="inpPaN" layoutX="221.0" layoutY="89.0" prefHeight="25.0" prefWidth="159.0" />
-      <TextField fx:id="inpPaP" layoutX="221.0" layoutY="131.0" prefHeight="25.0" prefWidth="159.0" />
-      <TextField fx:id="inpPaQ" layoutX="221.0" layoutY="170.0" prefHeight="25.0" prefWidth="159.0" />
-      <TextField fx:id="InpPaKey" layoutX="226.0" layoutY="256.0" prefHeight="25.0" prefWidth="159.0" />
-      <Label layoutX="112.0" layoutY="260.0" text="Key(128)(MARS)" />
-      <Button fx:id="buttonKeygen" layoutX="520.0" layoutY="51.0" mnemonicParsing="false" onAction="#onKeygen" prefHeight="25.0" prefWidth="66.0" text="Keygen" />
+      <Button fx:id="buttonOpenFile" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#onOpenFile" prefHeight="25.0" prefWidth="85.0" style="-fx-background-color: #3E5F8A;" text="Open File" textFill="WHITE" />
+      <Button fx:id="buttonSaveFile" layoutX="14.0" layoutY="51.0" mnemonicParsing="false" onAction="#onSaveFile" prefHeight="25.0" prefWidth="85.0" style="-fx-background-color: #3E5F8A;" text="Save File" textFill="WHITE" />
+      <Button fx:id="buttonEncrypt" layoutX="501.0" layoutY="51.0" mnemonicParsing="false" onAction="#onEncrypt" prefHeight="25.0" prefWidth="85.0" style="-fx-background-color: #3E5F8A;" text="Encrypt" textFill="WHITE" />
+      <Button fx:id="buttonDecrypt" layoutX="501.0" layoutY="89.0" mnemonicParsing="false" onAction="#onDecrypt" prefHeight="25.0" prefWidth="85.0" style="-fx-background-color: #3E5F8A;" text="Decrypt" textFill="WHITE" />
+      <TextField fx:id="inpPaY" layoutX="221.0" layoutY="14.0" prefHeight="25.0" prefWidth="261.0" />
+      <ChoiceBox fx:id="choiceBoxMeth" layoutX="14.0" layoutY="89.0" prefHeight="25.0" prefWidth="85.0" style="-fx-background-color: #3E5F8A;" />
+      <Label layoutX="113.0" layoutY="18.0" text="y(Benaloh)" textFill="WHITE" />
+      <Label layoutX="114.0" layoutY="55.0" text="r(Benaloh)" textFill="WHITE" />
+      <Label layoutX="113.0" layoutY="93.0" text="n(Benaloh)" textFill="WHITE" />
+      <Label layoutX="112.0" layoutY="135.0" text="p(Benaloh)" textFill="WHITE" />
+      <Label layoutX="112.0" layoutY="174.0" text="q(Benaloh)" textFill="WHITE" />
+      <TextField fx:id="inpPaR" layoutX="221.0" layoutY="51.0" prefHeight="25.0" prefWidth="261.0" />
+      <TextField fx:id="inpPaN" layoutX="221.0" layoutY="89.0" prefHeight="25.0" prefWidth="261.0" />
+      <TextField fx:id="inpPaP" layoutX="221.0" layoutY="131.0" prefHeight="25.0" prefWidth="261.0" />
+      <TextField fx:id="inpPaQ" layoutX="221.0" layoutY="170.0" prefHeight="25.0" prefWidth="261.0" />
+      <TextField fx:id="InpPaKey" layoutX="221.0" layoutY="207.0" prefHeight="25.0" prefWidth="261.0" />
+      <Label layoutX="112.0" layoutY="211.0" text="Key(128)(MARS)" textFill="WHITE" />
+      <Button fx:id="buttonKeygen" layoutX="501.0" layoutY="14.0" mnemonicParsing="false" onAction="#onKeygen" prefHeight="25.0" prefWidth="85.0" style="-fx-background-color: #3E5F8A;" text="Keygen" textFill="WHITE" />
+      <ImageView fitHeight="85.0" fitWidth="85.0" layoutX="14.0" layoutY="149.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="mai.jpg" />
+         </image>
+      </ImageView>
    </children>
 </Pane>
