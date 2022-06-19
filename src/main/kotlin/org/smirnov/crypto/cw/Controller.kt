@@ -1,10 +1,9 @@
-package org.poznansky.crypto.cw
+package org.smirnov.crypto.cw
 
 import javafx.event.ActionEvent
 import javafx.fxml.Initializable
 import javafx.fxml.FXML
 import javafx.scene.control.ChoiceBox
-import javafx.scene.control.TextArea
 import javafx.scene.control.TextField
 import javafx.scene.layout.Pane
 import javafx.stage.FileChooser

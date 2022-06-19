@@ -1,4 +1,4 @@
-package org.poznansky.crypto.cw
+package org.smirnov.crypto.cw
 
 import javafx.application.Application
 import javafx.fxml.FXMLLoader

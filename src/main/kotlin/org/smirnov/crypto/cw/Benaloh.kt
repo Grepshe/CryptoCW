@@ -1,4 +1,4 @@
-package org.poznansky.crypto.cw
+package org.smirnov.crypto.cw
 
 import java.math.BigInteger
 import java.nio.file.Files
