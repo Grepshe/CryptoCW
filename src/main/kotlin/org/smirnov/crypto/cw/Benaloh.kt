@@ -92,13 +92,7 @@ fun decryptBenaloh(keys: Keys, input: Path, output: Path) {
 
 
 fun generateRPQ(): Triple<BigInteger, BigInteger, BigInteger> {
-    val r = 263.toBig()
-
-    //r*(LARGE/r) - > +r -> +r
-
-//    val p = generateSequence(r * 1000.toBig()) { it + r }
-//        .dropWhile { !(it + ONE).isProbablePrime(cert) }
-//        .first() + ONE
+    val r = 277.toBig()
 
     val p = generateSequence(r * BigInteger(MAX_BITS / 2, cert, rnd)) { it + r }
         .map { it + ONE }
