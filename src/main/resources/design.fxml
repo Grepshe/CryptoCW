@@ -8,7 +8,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.Pane?>
 
-<Pane fx:id="paneMain" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: gray;" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.smirnov.crypto.cw.Controller">
+<Pane fx:id="paneMain" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: green;" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.smirnov.crypto.cw.Controller">
    <children>
       <Button fx:id="buttonOpenFile" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#onOpenFile" prefHeight="25.0" prefWidth="85.0" style="-fx-background-color: #3E5F8A;" text="Open File" textFill="WHITE" />
       <Button fx:id="buttonSaveFile" layoutX="14.0" layoutY="51.0" mnemonicParsing="false" onAction="#onSaveFile" prefHeight="25.0" prefWidth="85.0" style="-fx-background-color: #3E5F8A;" text="Save File" textFill="WHITE" />
