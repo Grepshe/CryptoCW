@@ -10,6 +10,45 @@ const val cert = 10
 val rnd = Random()
 val ONE = BigInteger.ONE
 
+    fun powmod(x: BigInteger, y: BigInteger, p: BigInteger): BigInteger {
+        var x = x
+        var y = y
+        var res = BigInteger.ONE // Initialize result
+        x = x % p // Update x if it is more than or
+        // equal to p
+        while (y > BigInteger.ZERO) {
+            // If y is odd, multiply x with result
+            if (y and BigInteger.ONE > BigInteger.ZERO) res = res * x % p
+
+            // y must be even now
+            y = y shr 1 // y = y/2
+            x = x * x % p
+        }
+        return res
+    }
+
+    // Function to calculate k for given a, b, m
+    fun discreteLogarithm(a: BigInteger, b: BigInteger, m: BigInteger): BigInteger {
+        val n = (Math.sqrt(m.toDouble()) + 1).toInt().toBig()
+        val value = Array<BigInteger>(m.toInt()) { _: Int -> BigInteger.ZERO }
+
+        // Store all values of a^(n*i) of LHS
+        for (i in n.toInt() downTo 1) value[powmod(a, i.toBig() * n, m).toInt()] = i.toBig()
+        for (j in 0 until n.toInt()) {
+            // Calculate (a ^ j) * b and check
+            // for collision
+            val cur = powmod(a, j.toBig(), m) * b % m
+
+            // If collision occurs i.e., LHS = RHS
+            if (value[cur.toInt()] > BigInteger.ZERO) {
+                val ans = value[cur.toInt()] * n - j.toBig()
+                // Check whether ans lies below m or not
+                if (ans < m) return ans
+            }
+        }
+        return (-1).toBig()
+    }
+
 data class PublicKey(
     val y: BigInteger,
     val r: BigInteger,
